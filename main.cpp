@@ -35,7 +35,10 @@ int main(int argc, char** argv) {
     std::vector<Sphere> scene;
     scene.push_back(Sphere(Vec3(0, -0.5, -3.0), Vec3(0, 255, 0), 1.0));
     scene.push_back(Sphere(Vec3(0, 0, -4.0), Vec3(0, 0, 255), 1.0));
-    scene.push_back(Sphere(Vec3(0.5, 3.0, -5.0), Vec3(255, 0, 0), 1.0));
+    scene.push_back(Sphere(Vec3(0.5, 5.0, -5.0), Vec3(255, 0, 0), 1.0));
+
+    std::vector<Light> lights;
+    lights.push_back(Vec3())
 
     std::vector<std::vector<Vec3> > picture;
     for (int x = 0; x < width; x++) {

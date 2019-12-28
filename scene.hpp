@@ -56,3 +56,17 @@ public:
     Vec3 color;
     float radius;
 };
+
+enum LightType {
+    POINT,
+    DIRECTIONAL,
+    FILL
+};
+
+class Light {
+    Light(const Vec3& position_, LightType type_) :
+        position(position_), type(type_) {}
+
+    Vec3 position;
+    LightType type;
+}
