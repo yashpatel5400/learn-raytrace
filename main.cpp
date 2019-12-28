@@ -130,7 +130,7 @@ int main() {
     Vec3 camera(0.0, 0.0, 0.0);
     float imageZ = -1.0;
 
-    auto sphere = new Sphere(Vec3(0, 0, -3.0), 1.0);
+    auto sphere = new Sphere(Vec3(0, 0, -5.0), 1.0);
 
     std::vector<std::shared_ptr<Object> > scene;
     scene.push_back(std::shared_ptr<Sphere>(sphere));
