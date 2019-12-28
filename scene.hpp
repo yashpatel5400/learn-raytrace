@@ -43,13 +43,24 @@ public:
         center(center_), color(color_), radius(radius_) {}
 
     std::pair<Vec3, bool> intersect(const Ray& ray) {
-        float minT = (center - ray.point) * ray.dir;
-        float minDist = minT * minT + 2 * minT * (ray.point - center) * ray.dir + (ray.point - center) * (ray.point - center);
-        Vec3 intersection = ray.point + ray.dir * minT;
-        if (minDist < (radius * radius)) {
-            return std::pair<Vec3, bool>(intersection, true);
+        float a = 1.0;
+        float b = 2 * (ray.point - center) * ray.dir;
+        float c = (ray.point - center) * (ray.point - center) - radius * radius;
+        float det = b * b - 4 * a * c;
+
+        if (det < 0) {
+            // imaginary solution corresponds to no intersection with sphere
+            return std::pair<Vec3, bool>(Vec3(-1.0, -1.0, -1.0), false);
         }
-        return std::pair<Vec3, bool>(Vec3(-1.0, -1.0, -1.0), false);
+
+        float minT = (-b - sqrt(det)) / (2 * a);
+        if (minT < 0) {
+            // negative solution corresponds to intersection behind the ray origin
+            return std::pair<Vec3, bool>(Vec3(-1.0, -1.0, -1.0), false);
+        }
+
+        Vec3 intersection = ray.point + ray.dir * minT;
+        return std::pair<Vec3, bool>(intersection, true);
     }
 
     Vec3 center;
@@ -64,9 +75,10 @@ enum LightType {
 };
 
 class Light {
-    Light(const Vec3& position_, LightType type_) :
-        position(position_), type(type_) {}
+public:
+    Light(const Vec3& pos_, LightType type_) :
+        pos(pos_), type(type_) {}
 
-    Vec3 position;
+    Vec3 pos;
     LightType type;
-}
+};
