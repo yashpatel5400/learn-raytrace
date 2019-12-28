@@ -33,18 +33,18 @@ int main(int argc, char** argv) {
     float imageZ = -1.0;
 
     std::vector<Sphere> scene;
-    scene.push_back(Sphere(Vec3(0, -0.5, -3.0), Vec3(0, 255, 0), 1.0));
-    scene.push_back(Sphere(Vec3(0, 0, -4.0), Vec3(0, 0, 255), 1.0));
-    scene.push_back(Sphere(Vec3(-1.5, 0.5, -3.0), Vec3(255, 0, 0), 0.5));
+    scene.push_back(Sphere(Vec3(-1.5, 0.0, -3.0), Vec3(0, 255, 0), 1.0));
+    scene.push_back(Sphere(Vec3(0, 0, -2.5), Vec3(0, 0, 255), 1.0));
+    // scene.push_back(Sphere(Vec3(-0.5, 0.5, -3.0), Vec3(255, 0, 0), 1.5));
     scene.push_back(Sphere(Vec3(1.5, 1.5, -3.0), Vec3(255, 255, 0), 1.25));
 
     std::vector<Light> lights;
     lights.push_back(Light(Vec3(-1.0, 0.75, -3.0), LightType::POINT));
 
     std::vector<std::vector<Vec3> > picture;
-    for (int x = 0; x < width; x++) {
+    for (int y = 0; y < height; y++) {
         std::vector<Vec3> row;
-        for (int y = 0; y < height; y++) {
+        for (int x = 0; x < width; x++) {
             float ndcX = x - width / 2.0; // 2.0 * x / width - 1;
             float ndcY = y - height / 2.0; // 2.0 * y / height - 1;
             Vec3 dir(ndcX * pixelsToWorld, ndcY * pixelsToWorld, imageZ);
