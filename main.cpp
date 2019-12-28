@@ -86,22 +86,21 @@ public:
 
 class Sphere : public Object {
 public:
-    Sphere(const Vec3& center_, float radius_) :
-        center(center_), radius(radius_) {}
+    Sphere(const Vec3& center_, const Vec3& color_, float radius_) :
+        center(center_), color(color_), radius(radius_) {}
 
     std::pair<Vec3, bool> intersect(const Ray& ray) {
-        Vec3 k = center - ray.point;
-        float minDist = k * k - (k * ray.dir) * (k * ray.dir);
-        // std::cout << k << std::endl;
-        // std::cout << ray.dir << std::endl;
-        // std::cout << "====================" << std::endl;
+        float minT = (center - ray.point) * ray.dir;
+        float minDist = minT * minT + 2 * minT * (ray.point - center) * ray.dir + (ray.point - center) * (ray.point - center);
+        Vec3 intersection = ray.point + ray.dir * minT;
         if (minDist < (radius * radius)) {
-            return std::pair<Vec3, bool>(Vec3(-1.0, -1.0, -1.0), true);
+            return std::pair<Vec3, bool>(intersection, true);
         }
         return std::pair<Vec3, bool>(Vec3(-1.0, -1.0, -1.0), false);
     }
 
     Vec3 center;
+    Vec3 color;
     float radius;
 };
 
@@ -120,37 +119,39 @@ void draw(const std::string& fn, const std::vector<std::vector<Vec3> >& picture)
     output.close();
 }
 
-int main() {
+int main(int argc, char** argv) {
     // pixel coordinates
-    int width = 1080;
-    int height = 720;
+    int width = std::stoi(argv[1]);
+    int height = std::stoi(argv[2]);
 
-    float pixelsToWorld = 1.0 / 720; // arbitrarily choose world to pixel conversion scale
+    float pixelsToWorld = 2.0 / height; // arbitrarily choose world to pixel conversion scale
     // note: world coordinates with +z pointed OUT of the screen
     Vec3 camera(0.0, 0.0, 0.0);
     float imageZ = -1.0;
 
-    auto sphere = new Sphere(Vec3(0, 0, -5.0), 1.0);
-
-    std::vector<std::shared_ptr<Object> > scene;
-    scene.push_back(std::shared_ptr<Sphere>(sphere));
+    std::vector<Sphere> scene;
+    scene.push_back(Sphere(Vec3(0, -0.5, -3.0), Vec3(0, 255, 0), 1.0));
+    scene.push_back(Sphere(Vec3(0, 0, -4.0), Vec3(0, 0, 255), 1.0));
+    scene.push_back(Sphere(Vec3(0, 3.5, -5.0), Vec3(255, 0, 0), 1.0));
 
     std::vector<std::vector<Vec3> > picture;
     for (int x = 0; x < width; x++) {
         std::vector<Vec3> row;
         for (int y = 0; y < height; y++) {
-            Vec3 dir(x * pixelsToWorld, y * pixelsToWorld, imageZ);
+            float ndcX = x - width / 2.0; // 2.0 * x / width - 1;
+            float ndcY = y - height / 2.0; // 2.0 * y / height - 1;
+            Vec3 dir(ndcX * pixelsToWorld, ndcY * pixelsToWorld, imageZ);
             dir.normalize();
             const Ray ray(Vec3(0.0, 0.0, 0.0), dir);
 
             Vec3 color(0, 0, 0);
             float minZ = std::numeric_limits<float>::infinity();
-            for (const auto& object : scene) {
-                auto intersection = object->intersect(ray);
+            for (auto& object : scene) {
+                auto intersection = object.intersect(ray);
                 if (intersection.second) {
                     if (intersection.first.z < minZ) {
                         minZ = intersection.first.z;
-                        color.x = 255;
+                        color = object.color;
                     }
                 }
             }
