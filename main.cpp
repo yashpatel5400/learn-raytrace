@@ -132,7 +132,7 @@ int main(int argc, char** argv) {
     std::vector<Sphere> scene;
     scene.push_back(Sphere(Vec3(0, -0.5, -3.0), Vec3(0, 255, 0), 1.0));
     scene.push_back(Sphere(Vec3(0, 0, -4.0), Vec3(0, 0, 255), 1.0));
-    scene.push_back(Sphere(Vec3(0, 3.5, -5.0), Vec3(255, 0, 0), 1.0));
+    scene.push_back(Sphere(Vec3(0.5, 3.0, -5.0), Vec3(255, 0, 0), 1.0));
 
     std::vector<std::vector<Vec3> > picture;
     for (int x = 0; x < width; x++) {
@@ -145,12 +145,12 @@ int main(int argc, char** argv) {
             const Ray ray(Vec3(0.0, 0.0, 0.0), dir);
 
             Vec3 color(0, 0, 0);
-            float minZ = std::numeric_limits<float>::infinity();
+            float maxZ = -std::numeric_limits<float>::infinity();
             for (auto& object : scene) {
                 auto intersection = object.intersect(ray);
                 if (intersection.second) {
-                    if (intersection.first.z < minZ) {
-                        minZ = intersection.first.z;
+                    if (intersection.first.z > maxZ) {
+                        maxZ = intersection.first.z;
                         color = object.color;
                     }
                 }
