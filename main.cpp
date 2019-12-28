@@ -8,16 +8,20 @@ class Vec3 {
 public:
     Vec3(float x_, float y_, float z_) :
         x(x_), y(y_), z(z_) {
-        mag = sqrt(x * x + y * y + z * z);
+        m_norm = sqrt(x * x + y * y + z * z);
+    }
+
+    float norm() {
+        return m_norm;
     }
 
     void normalize() {
-        x /= mag;
-        y /= mag;
-        z /= mag;
+        x /= m_norm;
+        y /= m_norm;
+        z /= m_norm;
     }
 
-    float mag, x, y, z;
+    float m_norm, x, y, z;
 };
 
 Vec3 operator -(const Vec3& lhs, const Vec3& rhs) {
@@ -80,13 +84,35 @@ public:
     Vec3 color;
 };
 
+class Sphere : public Object {
+public:
+    Sphere(const Vec3& center_, float radius_) :
+        center(center_), radius(radius_) {}
+
+    std::pair<Vec3, bool> intersect(const Ray& ray) {
+        Vec3 k = center - ray.point;
+        float minDist = k * k - (k * ray.dir) * (k * ray.dir);
+        // std::cout << k << std::endl;
+        // std::cout << ray.dir << std::endl;
+        // std::cout << "====================" << std::endl;
+        if (minDist < (radius * radius)) {
+            return std::pair<Vec3, bool>(Vec3(-1.0, -1.0, -1.0), true);
+        }
+        return std::pair<Vec3, bool>(Vec3(-1.0, -1.0, -1.0), false);
+    }
+
+    Vec3 center;
+    float radius;
+};
+
 void draw(const std::string& fn, const std::vector<std::vector<Vec3> >& picture) {
     std::ofstream output;
     output.open(fn);
     output << "P3 " << picture.size() << " " << picture[0].size() << " 255" << std::endl;
     for (int x = 0; x < picture.size(); x++)  {
         for (int y = 0; y < picture[x].size(); y++) {
-            output << picture[x][y] << " ";
+            auto color = picture[x][y];
+            output << std::to_string(int(color.x)) + " " + std::to_string(int(color.y)) + " " + std::to_string(int(color.z)) << " ";
         }
         output << std::endl;
     }
@@ -104,23 +130,18 @@ int main() {
     Vec3 camera(0.0, 0.0, 0.0);
     float imageZ = -1.0;
 
-    auto table = new Plane(
-        Vec3(0.0, -.25, 0.0),
-        Vec3(0.0, 1.0, 0.0),
-        Vec3(255, 0, 0)
-    );
+    auto sphere = new Sphere(Vec3(0, 0, -3.0), 1.0);
 
     std::vector<std::shared_ptr<Object> > scene;
-    scene.push_back(std::shared_ptr<Plane>(table));
+    scene.push_back(std::shared_ptr<Sphere>(sphere));
 
     std::vector<std::vector<Vec3> > picture;
     for (int x = 0; x < width; x++) {
         std::vector<Vec3> row;
         for (int y = 0; y < height; y++) {
-            const Ray ray(
-                Vec3(0.0, 0.0, 0.0),
-                Vec3(x * pixelsToWorld, y * pixelsToWorld, imageZ)
-            );
+            Vec3 dir(x * pixelsToWorld, y * pixelsToWorld, imageZ);
+            dir.normalize();
+            const Ray ray(Vec3(0.0, 0.0, 0.0), dir);
 
             Vec3 color(0, 0, 0);
             float minZ = std::numeric_limits<float>::infinity();
